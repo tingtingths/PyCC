@@ -30,10 +30,11 @@ def construct_dict(filename):
 
 def convert_files(d, files):
     for f in files:
-        encoding = detect(open(f, "rb").read())
+        org_f = open(f, "rb")
+        encoding = detect(org_f.read())
         print("Suggested encoding:" + encoding)
         s = convert(open(f, "r", encoding=encoding).read(), d)
-        open("_" + f, "w", encoding="utf8").write(s)
+        open(os.path.dirname(os.path.abspath(org_f.name)) + os.path.sep + "_" + os.path.basename(org_f.name), "w", encoding="utf8").write(s)
 
 if __name__ == "__main__":
 
