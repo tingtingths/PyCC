@@ -1,6 +1,6 @@
 # Chinese characters convert tool
 # Traditional <--> Simplified, from any encoding to utf-8.
-import sys, chardet
+import sys, chardet, os
 
 
 def detect(bytes):
@@ -28,25 +28,32 @@ def construct_dict(filename):
 
     return d
 
+def convert_files(d, files):
+    for f in files:
+        encoding = detect(open(f, "rb").read())
+        print("Suggested encoding:" + encoding)
+        s = convert(open(f, "r", encoding=encoding).read(), d)
+        open("_" + f, "w", encoding="utf8").write(s)
+
 if __name__ == "__main__":
 
-    if len(sys.argv) == 1:
+    if len(sys.argv) < 3:
         # display help
-        print("cc <input file> <option = -t2s/-s2t/'none'>")
+        print("Usage: cc <option = -t2s/-s2t/-i> <input files>")
 
-    if len(sys.argv) > 1:  # at least 2
-        data = open(sys.argv[1], "rb").read()
-        encoding = detect(data)
-        print("Detected input encoding: " + encoding)
+    if len(sys.argv) >= 3:
+        files = sys.argv[2:]
+        option = sys.argv[1]
+        cd = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "dict" + os.path.sep
 
-    if len(sys.argv) > 2:
-        # convert file
-        dict_file = "t2s"
-        if sys.argv[2] == "-s2t":
+        if option == "-t2s":
+            dict_file = "t2s"
+            convert_files(construct_dict(cd + dict_file), files)
+        elif option == "-s2t":
             dict_file = "s2t"
-
-        # decode the bytes into unicode string, and convert
-        s = convert(data.decode(encoding), construct_dict(dict_file))
-
-        # output result to file
-        open("out", "w", encoding="utf8").write(s)
+            convert_files(construct_dict(cd + dict_file), files)
+        elif option == "-i":
+            for f in files:
+                print("Suggested encoding:" + detect(open(f, "rb").read()))
+        else:
+            print("Usage: cc <option = -t2s/-s2t/-i> <input files>")
