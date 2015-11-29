@@ -1,6 +1,8 @@
 # Chinese characters convert tool
 # Traditional <--> Simplified, from any encoding to utf-8.
-import sys, chardet, os
+import sys
+import chardet
+import os
 
 
 def detect(bytes):
@@ -28,19 +30,23 @@ def construct_dict(filename):
 
     return d
 
+
 def convert_files(d, files):
     for f in files:
         org_f = open(f, "rb")
+        org_filename = os.path.basename(org_f.name)
+        org_dirname = os.path.dirname(os.path.abspath(org_f.name))
         encoding = detect(org_f.read())
         print("Suggested encoding:" + encoding)
         s = convert(open(f, "r", encoding=encoding).read(), d)
-        open(os.path.dirname(os.path.abspath(org_f.name)) + os.path.sep + "_" + os.path.basename(org_f.name), "w", encoding="utf8").write(s)
+        open(org_dirname + os.path.sep + "_" + org_filename,
+             "w", encoding="utf8").write(s)
 
 if __name__ == "__main__":
 
     if len(sys.argv) < 3:
         # display help
-        print("Usage: cc <option = -t2s/-s2t/-i> <input files>")
+        print("Usage: pycc <option = -t2s/-s2t/-i> <input files>")
 
     if len(sys.argv) >= 3:
         files = sys.argv[2:]
@@ -57,4 +63,4 @@ if __name__ == "__main__":
             for f in files:
                 print("Suggested encoding:" + detect(open(f, "rb").read()))
         else:
-            print("Usage: cc <option = -t2s/-s2t/-i> <input files>")
+            print("Usage: pycc <option = -t2s/-s2t/-i> <input files>")
