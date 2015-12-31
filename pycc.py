@@ -61,22 +61,18 @@ if __name__ == "__main__":
 		print_help()
 	else:
 		try:
-			option = args.popleft()
+			option = args.popleft()[1:]
 			if "-g" == args[0] or "-glob" == args[0]:
 				args.popleft()
 				files = glob.glob(args.popleft())
 			else:
 				files = args
 			cd = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "dict" + os.path.sep
-			if option == "-t2s":
-				dict_file = "t2s"
-				convert_files(construct_dict(cd + dict_file), files)
-			elif option == "-s2t":
-				dict_file = "s2t"
-				convert_files(construct_dict(cd + dict_file), files)
-			elif option == "-i":
+			if option == "i":
 				for f in files:
 					print("Suggested encoding:" + detect(open(f, "rb").read()))
+			elif option == "t2s" or option == "s2t":
+				convert_files(construct_dict(cd + option), files)
 			else:
 				print_help()
 		except Exception as e:
