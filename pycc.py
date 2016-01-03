@@ -8,7 +8,9 @@ from collections import deque
 
 
 def detect(bytes):
-	return chardet.detect(bytes)["encoding"]
+	encoding_swap = {"big5":"cp950", "gb2312":"gbk"}
+	codec = chardet.detect(bytes)["encoding"]
+	return codec if codec.lower() not in encoding_swap else encoding_swap[codec.lower()]
 
 
 def convert(s, d):
@@ -38,10 +40,10 @@ def convert_files(d, files):
 		org_f = open(f, "rb")
 		org_filename = os.path.basename(org_f.name)
 		org_dirname = os.path.dirname(os.path.abspath(org_f.name))
-		encoding = detect(org_f.read())
+		codec = detect(org_f.read())
 		print(f)
-		print("    Suggested encoding:" + encoding)
-		s = convert(open(f, "r", encoding=encoding).read(), d)
+		print("    Suggested encoding:" + codec)
+		s = convert(open(f, encoding=codec).read(), d)
 		open(org_dirname + os.path.sep + "_" + org_filename,
 			"w", encoding="utf8").write(s)
 
@@ -76,4 +78,4 @@ if __name__ == "__main__":
 			else:
 				print_help()
 		except Exception as e:
-			print_help()
+			print(e)
