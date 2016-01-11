@@ -10,6 +10,8 @@ from collections import deque
 def detect(bytes):
 	encoding_swap = {"big5":"cp950", "gb2312":"gbk"}
 	codec = chardet.detect(bytes)["encoding"]
+	if codec == None:
+		return None
 	return codec if codec.lower() not in encoding_swap else encoding_swap[codec.lower()]
 
 
@@ -42,7 +44,11 @@ def convert_files(d, files):
 		org_dirname = os.path.dirname(os.path.abspath(org_f.name))
 		codec = detect(org_f.read())
 		print(f)
-		print("    Suggested encoding:" + codec)
+		if codec == None:
+			codec = input("Error detecting encoding, set encoding to >")
+			print("    Selected encoding: " + codec)
+		else:
+			print("    Suggested encoding: " + codec)
 		s = convert(open(f, encoding=codec).read(), d)
 		open(org_dirname + os.path.sep + "_" + org_filename,
 			"w", encoding="utf8").write(s)
@@ -50,9 +56,9 @@ def convert_files(d, files):
 
 def print_help():
 	print("Usage: " + os.path.basename(__file__) + " <command> [-g | -glob] <input_files | glob_pattern>")
-	print("  command: ")
+	print("  command:")
 	print("    -t2s Traditional chinese to Simplified chinese")
-	print("    -t2s Simplified chinese to Traditional chinese")
+	print("    -s2t Simplified chinese to Traditional chinese")
 	print("    -i Print suggested encoding only")
 	print("  -g, -glob Select files with glob pattern")
 
