@@ -61,7 +61,7 @@ def print_help():
     print("    -s2t         Simplified chinese to Traditional chinese")
     print("    -i           Only print suggested encoding for file(s)")
     print("  option:")
-    print("    -g, -glob    Select file(s) with glob pattern")
+    print("    -g           Select file(s) with glob pattern")
     print("    -s           Convert using string(s) from argument")
 
 if __name__ == "__main__":
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         try:
             command = args.popleft()[1:]
             input_string = False
-            if "-g" == args[0] or "-glob" == args[0]:
+            if "-g" == args[0]:
                 args.popleft()
                 input = glob.glob(args.popleft())
             elif "-s" == args[0]:
