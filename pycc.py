@@ -48,7 +48,7 @@ def convert_files(d, files, dry_run=False):
             codec = input("Error detecting encoding, set encoding to >")
             print("    Selected encoding: " + codec)
         else:
-            print("    Suggested encoding: " + codec)
+            print("    Detected encoding: " + codec)
         if not dry_run:
             s = convert(open(f, encoding=codec).read(), d)
             open(org_dirname + os.path.sep + "_" + org_filename, "w", encoding="utf8").write(s)
