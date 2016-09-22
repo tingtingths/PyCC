@@ -4,6 +4,7 @@ import sys
 import chardet
 import os
 import glob
+import argparse
 from collections import deque
 
 
@@ -36,8 +37,7 @@ def construct_dict(filename):
 
     return d
 
-
-def convert_files(d, files):
+def convert_files(d, files, dry_run=False):
     for f in files:
         org_f = open(f, "rb")
         org_filename = os.path.basename(org_f.name)
@@ -49,50 +49,22 @@ def convert_files(d, files):
             print("    Selected encoding: " + codec)
         else:
             print("    Suggested encoding: " + codec)
-        s = convert(open(f, encoding=codec).read(), d)
-        open(org_dirname + os.path.sep + "_" + org_filename,
-            "w", encoding="utf8").write(s)
-
-
-def print_help():
-    print("Usage: " + os.path.basename(__file__) + " <command> [option] <input_file | glob_pattern | string>...")
-    print("  command:")
-    print("    -t2s         Traditional chinese to Simplified chinese")
-    print("    -s2t         Simplified chinese to Traditional chinese")
-    print("    -i           Only print suggested encoding for file(s)")
-    print("  option:")
-    print("    -g           Select file(s) with glob pattern")
-    print("    -s           Convert using string(s) from argument")
+        if not dry_run:
+            s = convert(open(f, encoding=codec).read(), d)
+            open(org_dirname + os.path.sep + "_" + org_filename, "w", encoding="utf8").write(s)
 
 if __name__ == "__main__":
-    args = deque(sys.argv[1:])
+    parser = argparse.ArgumentParser(description="Convert chinese characters.")
+    parser.add_argument("-t", choices=["s2t", "t2s"], help="simplified chinese to traditional chines or vice versa")
+    parser.add_argument("--dry-run", action="store_true", help="print detected encoding only")
+    parser.add_argument("-s", metavar="string", type=str, nargs="*", help="string(s) to convert")
+    parser.add_argument("-f", metavar="file", type=str, nargs="*", help="file(s) to convert")
+    args = parser.parse_args()
 
-    if len(sys.argv) < 2 or "-h" in args or "-help" in args:
-        print_help()
-    else:
-        try:
-            command = args.popleft()[1:]
-            input_string = False
-            if "-g" == args[0]:
-                args.popleft()
-                input = glob.glob(args.popleft())
-            elif "-s" == args[0]:
-                args.popleft()
-                input_string = True
-                input = args
-            else:
-                input = args
-            cd = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "dict" + os.path.sep
-            if command == "i":
-                for f in input:
-                    print("Suggested encoding:" + detect(open(f, "rb").read()))
-            elif command == "t2s" or command == "s2t":
-                if input_string:
-                    for s in args:
-                        print(convert(s, construct_dict(cd + command)))
-                else:
-                    convert_files(construct_dict(cd + command), input)
-            else:
-                print_help()
-        except Exception as e:
-            print(e)
+    cd = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "dict" + os.path.sep
+    dict = construct_dict(cd + args.t)
+    if args.f:
+        convert_files(dict, args.f, args.dry_run)
+    if args.s:
+        for s in args.s:
+            convert(dict, s, construct_dict(cd + command))
