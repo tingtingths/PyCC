@@ -44,7 +44,7 @@ def convert_files(d, files, dry_run=False):
         org_dirname = os.path.dirname(os.path.abspath(org_f.name))
         codec = detect(org_f.read())
         print(f)
-        if codec == None:
+        if codec == None and not dry_run:
             codec = input("Error detecting encoding, set encoding to >")
             print("    Selected encoding: " + codec)
         else:
@@ -52,6 +52,18 @@ def convert_files(d, files, dry_run=False):
         if not dry_run:
             s = convert(open(f, encoding=codec).read(), d)
             open(org_dirname + os.path.sep + "_" + org_filename, "w", encoding="utf8").write(s)
+
+def convert_strings(d, strings, dry_run=False):
+    for s in strings:
+        codec = detect(s.encode())
+        print(s)
+        if codec == None and not dry_run:
+            codec = input("Error detecting encoding, set encoding to >")
+            print("    Selected encoding: " + codec)
+        else:
+            print("    Detected encoding: " + codec)
+        if not dry_run:
+            print(convert(s, d))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert chinese characters.")
@@ -62,9 +74,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cd = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "dict" + os.path.sep
-    dict = construct_dict(cd + args.t)
+    if not args.dry_run:
+        dict = construct_dict(cd + args.t)
     if args.f:
         convert_files(dict, args.f, args.dry_run)
     if args.s:
-        for s in args.s:
-            convert(dict, s, construct_dict(cd + command))
+        convert_strings(dict, args.s, args.dry_run)
