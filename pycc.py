@@ -37,7 +37,7 @@ def construct_dict(filename):
 
     return d
 
-def convert_files(d, files, dry_run=False):
+def convert_files(d, files, dry_run=False, replace=False):
     for f in files:
         org_f = open(f, "rb")
         org_filename = os.path.basename(org_f.name)
@@ -51,7 +51,8 @@ def convert_files(d, files, dry_run=False):
             print("    Detected encoding: " + codec)
         if not dry_run:
             s = convert(open(f, encoding=codec).read(), d)
-            open(org_dirname + os.path.sep + "_" + org_filename, "w", encoding="utf8").write(s)
+            prefix = "" if replace else "_"
+            open(org_dirname + os.path.sep + prefix + org_filename, "w", encoding="utf8").write(s)
 
 def convert_strings(d, strings, dry_run=False):
     for s in strings:
@@ -67,16 +68,22 @@ def convert_strings(d, strings, dry_run=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert chinese characters.")
-    parser.add_argument("-t", choices=["s2t", "t2s"], help="simplified chinese to traditional chines or vice versa")
+    parser.add_argument("operation", choices=["s2t", "t2s"], help="simplified chinese to traditional chines or vice versa")
     parser.add_argument("--dry-run", action="store_true", help="print detected encoding only")
-    parser.add_argument("-s", metavar="string", type=str, nargs="*", help="string(s) to convert")
-    parser.add_argument("-f", metavar="file", type=str, nargs="*", help="file(s) to convert")
+    parser.add_argument("--replace", action="store_true", help="replace original file(s)")
+    parser.add_argument("inputs", metavar="INPUT", type=str, nargs="*", help="file(s) or string(s) to convert")
     args = parser.parse_args()
 
     cd = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "dict" + os.path.sep
     if not args.dry_run:
-        dict = construct_dict(cd + args.t)
-    if args.f:
-        convert_files(dict, args.f, args.dry_run)
-    if args.s:
-        convert_strings(dict, args.s, args.dry_run)
+        dict = construct_dict(cd + args.operation)
+    for _input in args.inputs:
+        files = []
+        strings = []
+        if os.path.exists(_input):
+            files.append(_input)
+        else:
+            strings.append(_input)
+
+        convert_files(dict, files, args.dry_run, args.replace)
+        convert_strings(dict, strings, args.dry_run)
