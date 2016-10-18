@@ -71,7 +71,7 @@ if __name__ == "__main__":
     parser.add_argument("operation", choices=["s2t", "t2s"], help="simplified chinese to traditional chines or vice versa")
     parser.add_argument("--dry-run", action="store_true", help="print detected encoding only")
     parser.add_argument("--replace", action="store_true", help="replace original file(s)")
-    parser.add_argument("inputs", metavar="INPUT", type=str, nargs="*", help="file(s) or string(s) to convert")
+    parser.add_argument("inputs", metavar="INPUT", type=str, nargs="+", help="file(s) or string(s) to convert")
     args = parser.parse_args()
 
     cd = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "dict" + os.path.sep
